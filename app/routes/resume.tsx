@@ -43,7 +43,8 @@ const Resume = () => {
 
     const imageBlob = await fs.read(data.imagePath);
     if (!imageBlob) return;
-    const imageUrl = URL.createObjectURL(imageBlob);
+    const typedImageBlob = new Blob([imageBlob], { type: "image/png" });
+    const imageUrl = URL.createObjectURL(typedImageBlob);
     setImageUrl(imageUrl);
 
     setFeedback(data.feedback);

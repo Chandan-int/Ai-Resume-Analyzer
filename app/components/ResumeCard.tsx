@@ -12,20 +12,47 @@ const ResumeCard = ({
   const { fs } = usePuterStore();
 
   useEffect(() => {
+    let objectUrl = "";
+    let isMounted = true;
+
     const loadResumeImage = async () => {
       if (!imagePath) return;
-      if (imagePath.startsWith("/") || imagePath.startsWith("http")) {
-        setResumeUrl(imagePath);
+
+      // Only static public assets (like /images/resume_01.png) or external http/data URLs use direct src
+      if (
+        imagePath.startsWith("/images/") ||
+        imagePath.startsWith("http://") ||
+        imagePath.startsWith("https://") ||
+        imagePath.startsWith("data:")
+      ) {
+        if (isMounted) setResumeUrl(imagePath);
         return;
       }
-      const blob = await fs.read(imagePath);
-      if (!blob) return;
 
-      const url = URL.createObjectURL(blob);
-      setResumeUrl(url);
+      // All Puter FS paths are read asynchronously from Puter filesystem
+      try {
+        const blob = await fs.read(imagePath);
+        if (!blob) return;
+
+        const typedBlob = new Blob([blob], { type: "image/png" });
+        objectUrl = URL.createObjectURL(typedBlob);
+        if (isMounted) {
+          setResumeUrl(objectUrl);
+        }
+      } catch (err) {
+        console.error("Failed to read image blob:", imagePath, err);
+      }
     };
+
     loadResumeImage();
-  }, [imagePath]);
+
+    return () => {
+      isMounted = false;
+      if (objectUrl) {
+        URL.revokeObjectURL(objectUrl);
+      }
+    };
+  }, [imagePath, fs]);
 
   return (
     <Link

@@ -69,11 +69,21 @@ const Upload = () => {
         return setStatusText("Failed to upload preview image. Please try again.");
       }
 
+      const getPath = (res: any) => {
+        if (!res) return "";
+        if (typeof res === "string") return res;
+        if (Array.isArray(res) && res.length > 0) return res[0]?.path || res[0]?.name || "";
+        return res.path || res.name || "";
+      };
+
       const uuid = generateUUID();
+      const resumePathStr = getPath(uploadFile);
+      const imagePathStr = getPath(uploadImage);
+
       const data = {
         id: uuid,
-        resumePath: uploadFile.path,
-        imagePath: uploadImage.path,
+        resumePath: resumePathStr,
+        imagePath: imagePathStr,
         companyName,
         jobTitle,
         jobDescription,
