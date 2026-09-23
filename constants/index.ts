@@ -91,68 +91,100 @@ export const resumes: Resume[] = [
   },
 ];
 
-export const AIResponseFormat = `
-      interface Feedback {
-      overallScore: number; //max 100
-      ATS: {
-        score: number; //rate based on ATS suitability
-        tips: {
-          type: "good" | "improve";
-          tip: string; //give 3-4 tips
-        }[];
-      };
-      toneAndStyle: {
-        score: number; //max 100
-        tips: {
-          type: "good" | "improve";
-          tip: string; //make it a short "title" for the actual explanation
-          explanation: string; //explain in detail here
-        }[]; //give 3-4 tips
-      };
-      content: {
-        score: number; //max 100
-        tips: {
-          type: "good" | "improve";
-          tip: string; //make it a short "title" for the actual explanation
-          explanation: string; //explain in detail here
-        }[]; //give 3-4 tips
-      };
-      structure: {
-        score: number; //max 100
-        tips: {
-          type: "good" | "improve";
-          tip: string; //make it a short "title" for the actual explanation
-          explanation: string; //explain in detail here
-        }[]; //give 3-4 tips
-      };
-      skills: {
-        score: number; //max 100
-        tips: {
-          type: "good" | "improve";
-          tip: string; //make it a short "title" for the actual explanation
-          explanation: string; //explain in detail here
-        }[]; //give 3-4 tips
-      };
-    }`;
+export const AIResponseFormat = `{
+  "overallScore": 85,
+  "ATS": {
+    "score": 88,
+    "tips": [
+      {
+        "type": "good",
+        "tip": "Strong technical keywords matching job requirements"
+      },
+      {
+        "type": "improve",
+        "tip": "Use standard header titles for better parsing"
+      }
+    ]
+  },
+  "toneAndStyle": {
+    "score": 80,
+    "tips": [
+      {
+        "type": "good",
+        "tip": "Action-oriented language",
+        "explanation": "Your experience section uses active verbs like Developed, Built, and Deployed."
+      },
+      {
+        "type": "improve",
+        "tip": "Quantify project outcomes",
+        "explanation": "Add specific metrics like latency reductions or user count scaling."
+      }
+    ]
+  },
+  "content": {
+    "score": 82,
+    "tips": [
+      {
+        "type": "good",
+        "tip": "Relevant project highlights",
+        "explanation": "Machine learning and deep learning implementations are highlighted clearly."
+      },
+      {
+        "type": "improve",
+        "tip": "Elaborate on business value",
+        "explanation": "Detail how your machine learning models directly solved practical problems."
+      }
+    ]
+  },
+  "structure": {
+    "score": 85,
+    "tips": [
+      {
+        "type": "good",
+        "tip": "Logical section arrangement",
+        "explanation": "Education, Skills, and Projects are clearly organized."
+      },
+      {
+        "type": "improve",
+        "tip": "Consistent date alignment",
+        "explanation": "Ensure right-aligned dates and locations use identical formatting."
+      }
+    ]
+  },
+  "skills": {
+    "score": 90,
+    "tips": [
+      {
+        "type": "good",
+        "tip": "Modern technology stack",
+        "explanation": "Prominent display of Python, PyTorch, Azure, and REST APIs."
+      },
+      {
+        "type": "improve",
+        "tip": "Categorize core competencies",
+        "explanation": "Group tools into Languages, Frameworks, Cloud, and Databases."
+      }
+    ]
+  }
+}`;
 
 export const prepareInstructions = ({
   jobTitle,
   jobDescription,
-  AIResponseFormat,
+  AIResponseFormat: format = AIResponseFormat,
 }: {
   jobTitle: string;
   jobDescription: string;
-  AIResponseFormat: string;
+  AIResponseFormat?: string;
 }) =>
-  `You are an expert in ATS (Applicant Tracking System) and resume analysis.
-  Please analyze and rate this resume and suggest how to improve it.
-  The rating can be low if the resume is bad.
-  Be thorough and detailed. Don't be afraid to point out any mistakes or areas for improvement.
-  If there is a lot to improve, don't hesitate to give low scores. This is to help the user to improve their resume.
-  If available, use the job description for the job user is applying to to give more detailed feedback.
-  If provided, take the job description into consideration.
-  The job title is: ${jobTitle}
-  The job description is: ${jobDescription}
-  Provide the feedback using the following format: ${AIResponseFormat}
-  Return the analysis as a JSON object, without any other text and without the backticks.
-  Do not include any other text or comments.`;
+  `You are an expert ATS (Applicant Tracking System) and resume reviewer.
+Analyze the attached resume for the target job title "${jobTitle || "Software Engineer"}" and description "${jobDescription || "N/A"}".
+Evaluate the candidate's resume carefully across ATS compatibility, Tone & Style, Content, Structure, and Skills.
+
+IMPORTANT: You MUST reply ONLY with a valid JSON object matching this exact structure template:
+${format}
+
+Rules:
+1. Provide realistic score numbers (0-100) based on actual resume quality.
+2. Provide 3-4 detailed tips for each category. Each tip in toneAndStyle, content, structure, and skills MUST contain "type" ("good" or "improve"), "tip" (short summary title), and "explanation" (detailed explanation).
+3. Do not wrap in extra markdown text outside the JSON object. Return raw valid JSON only.`;
